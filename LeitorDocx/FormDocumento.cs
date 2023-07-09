@@ -196,7 +196,7 @@ namespace LeitorDocx
             oPara1.Range.Font.Size = 22;
             oPara1.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
             oPara1.Range.Font.Bold = 1;
-            oPara1.Format.SpaceBefore = 40;
+            oPara1.Format.SpaceBefore = 80;
             oPara1.Format.SpaceAfter = 24;
             oPara1.Range.InsertParagraphAfter();
 
@@ -427,12 +427,12 @@ namespace LeitorDocx
 
             string marcaDagua = Path.GetFullPath("marca.png");
             Microsoft.Office.Interop.Word.Range myRange = oWord.Selection.Range.GoTo(Microsoft.Office.Interop.Word.WdGoToItem.wdGoToPage, Microsoft.Office.Interop.Word.WdGoToItem.wdGoToPage, 1);
-            Microsoft.Office.Interop.Word.Shape myShape = oDoc.Shapes.AddPicture(marcaDagua, false, true, 0, 0, oDoc.Application.CentimetersToPoints((float)13), oDoc.Application.CentimetersToPoints((float)13), myRange);
+            Microsoft.Office.Interop.Word.Shape myShape = oDoc.Shapes.AddPicture(marcaDagua, false, true, 0, 0, oDoc.Application.CentimetersToPoints((float)13), oDoc.Application.CentimetersToPoints((float)8), myRange);
             myShape.WrapFormat.Type = Microsoft.Office.Interop.Word.WdWrapType.wdWrapTight;
             myShape.RelativeHorizontalPosition = Microsoft.Office.Interop.Word.WdRelativeHorizontalPosition.wdRelativeHorizontalPositionPage;
             myShape.Left = 130;
             myShape.RelativeVerticalPosition = Microsoft.Office.Interop.Word.WdRelativeVerticalPosition.wdRelativeVerticalPositionPage;
-            myShape.Top = 180;
+            myShape.Top = 230;
             myShape.WrapFormat.Type = Microsoft.Office.Interop.Word.WdWrapType.wdWrapBehind;
             myShape.ZOrder(Microsoft.Office.Core.MsoZOrderCmd.msoSendBackward);
 
