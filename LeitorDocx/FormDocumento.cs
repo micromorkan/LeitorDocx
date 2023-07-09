@@ -1,6 +1,7 @@
 ﻿using Microsoft.Office.Interop.Word;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -416,17 +417,22 @@ namespace LeitorDocx
 
             #region MARCA D'AGUA
 
-            string marcaDagua = AppDomain.CurrentDomain.BaseDirectory + @"marca.png";
+            //string marcaDagua = AppDomain.CurrentDomain.BaseDirectory + @"marca.png";
+            if (!File.Exists("marca.png"))
+            {
+                object obj = Properties.Resources.marca;
+                System.Drawing.Bitmap rs = (System.Drawing.Bitmap)(obj);
+                rs.Save("marca.png");
+            }
+
+            string path = Path.GetFullPath("marca.png");
             Microsoft.Office.Interop.Word.Range myRange = oWord.Selection.Range.GoTo(Microsoft.Office.Interop.Word.WdGoToItem.wdGoToPage, Microsoft.Office.Interop.Word.WdGoToItem.wdGoToPage, 1);
-            Microsoft.Office.Interop.Word.Shape myShape = oDoc.Shapes.AddPicture(marcaDagua, false, true, 0, 0, oDoc.Application.CentimetersToPoints((float)13), oDoc.Application.CentimetersToPoints((float)13), myRange);
-            //myShape.ScaleHeight(1, Microsoft.Office.Core.MsoTriState.msoTrue);  
-            //myShape.ScaleWidth(1, Microsoft.Office.Core.MsoTriState.msoTrue);  
+            Microsoft.Office.Interop.Word.Shape myShape = oDoc.Shapes.AddPicture(path, false, true, 0, 0, oDoc.Application.CentimetersToPoints((float)13), oDoc.Application.CentimetersToPoints((float)13), myRange);
             myShape.WrapFormat.Type = Microsoft.Office.Interop.Word.WdWrapType.wdWrapTight;
             myShape.RelativeHorizontalPosition = Microsoft.Office.Interop.Word.WdRelativeHorizontalPosition.wdRelativeHorizontalPositionPage;
             myShape.Left = 130;
             myShape.RelativeVerticalPosition = Microsoft.Office.Interop.Word.WdRelativeVerticalPosition.wdRelativeVerticalPositionPage;
             myShape.Top = 180;
-            //myShape.LockAspectRatio = Microsoft.Office.Core.MsoTriState.msoTrue;  
             myShape.WrapFormat.Type = Microsoft.Office.Interop.Word.WdWrapType.wdWrapBehind;
             myShape.ZOrder(Microsoft.Office.Core.MsoZOrderCmd.msoSendBackward);
 
