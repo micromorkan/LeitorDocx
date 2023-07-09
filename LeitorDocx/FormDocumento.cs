@@ -432,6 +432,8 @@ namespace LeitorDocx
 
             #endregion
 
+            #endregion
+
             //oDoc.PrintOut();
             //SaveFileDialog saveFileDialog = new SaveFileDialog();
             //saveFileDialog.Filter = "Documento do Word|*.docx";
