@@ -425,9 +425,9 @@ namespace LeitorDocx
                 rs.Save("marca.png");
             }
 
-            string path = Path.GetFullPath("marca.png");
+            string marcaDagua = Path.GetFullPath("marca.png");
             Microsoft.Office.Interop.Word.Range myRange = oWord.Selection.Range.GoTo(Microsoft.Office.Interop.Word.WdGoToItem.wdGoToPage, Microsoft.Office.Interop.Word.WdGoToItem.wdGoToPage, 1);
-            Microsoft.Office.Interop.Word.Shape myShape = oDoc.Shapes.AddPicture(path, false, true, 0, 0, oDoc.Application.CentimetersToPoints((float)13), oDoc.Application.CentimetersToPoints((float)13), myRange);
+            Microsoft.Office.Interop.Word.Shape myShape = oDoc.Shapes.AddPicture(marcaDagua, false, true, 0, 0, oDoc.Application.CentimetersToPoints((float)13), oDoc.Application.CentimetersToPoints((float)13), myRange);
             myShape.WrapFormat.Type = Microsoft.Office.Interop.Word.WdWrapType.wdWrapTight;
             myShape.RelativeHorizontalPosition = Microsoft.Office.Interop.Word.WdRelativeHorizontalPosition.wdRelativeHorizontalPositionPage;
             myShape.Left = 130;
