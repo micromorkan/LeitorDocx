@@ -1,11 +1,15 @@
 ﻿using Microsoft.Office.Interop.Word;
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using static System.Collections.Specialized.BitVector32;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace LeitorDocx
 {
@@ -120,9 +124,9 @@ namespace LeitorDocx
         {
             foreach (Control textbox in this.Controls)
             {
-                if (textbox is TextBox)
+                if (textbox is System.Windows.Forms.TextBox)
                 {
-                    ((TextBox)textbox).Text = String.Empty;
+                    ((System.Windows.Forms.TextBox)textbox).Text = String.Empty;
                 }
                 else if (textbox is MaskedTextBox)
                 {
@@ -133,6 +137,29 @@ namespace LeitorDocx
 
         private void button1_Click(object sender, EventArgs e)
         {
+            progressBar1.Visible = true;
+            progressBar1.Maximum = 100;
+            progressBar1.Step = 1;
+            progressBar1.Value = 0;
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            GerarDoc();            
+        }
+
+        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            // Change the value of the ProgressBar to the BackgroundWorker progress.
+            progressBar1.Value = e.ProgressPercentage;
+            // Set the text.
+            this.Text = e.ProgressPercentage.ToString();
+        }
+
+        private void GerarDoc()
+        {
+            backgroundWorker1.ReportProgress(1);
             #region PARAMETROS GLOBAIS DO WORD
 
             object oMissing = System.Reflection.Missing.Value;
@@ -147,13 +174,14 @@ namespace LeitorDocx
             oWord = new Microsoft.Office.Interop.Word.Application();
             oDoc = oWord.Documents.Add(ref oMissing, ref oMissing,
             ref oMissing, ref oMissing);
-
+            //oWord.Options.PrintBackground = true;
+            //oWord.DisplayAlerts = WdAlertLevel.wdAlertsNone;
             #endregion
 
             #region FLAG QUE DETERMINA SE O PROGRAMA WORD SERÁ ABERTO AO CRIAR O ARQUIVO EM MEMORIA
 
             //SOMENTE DEIXE TRUE PARA TESTAR. 
-            oWord.Visible = true;
+            oWord.Visible = false;
 
             #endregion
 
@@ -176,17 +204,19 @@ namespace LeitorDocx
             #region BORDA DO DOCUMENTO
 
             Borders borders = oDoc.Sections[1].Borders;
-            borders.Enable = 1; 
-            borders.DistanceFromTop = 30; 
-            borders.DistanceFromBottom = 24; 
-            borders.DistanceFromLeft = 26; 
-            borders.DistanceFromRight = 26; 
-            borders.OutsideLineStyle = WdLineStyle.wdLineStyleSingle; 
+            borders.Enable = 1;
+            borders.DistanceFromTop = 30;
+            borders.DistanceFromBottom = 24;
+            borders.DistanceFromLeft = 26;
+            borders.DistanceFromRight = 26;
+            borders.OutsideLineStyle = WdLineStyle.wdLineStyleSingle;
             borders.OutsideLineWidth = WdLineWidth.wdLineWidth300pt;
 
             #endregion
 
             #region CORPO DO DOCUMENTO
+
+            backgroundWorker1.ReportProgress(10);
 
             #region TÍTULO FICHA CADASTRAL - PESSOA FISICA
 
@@ -201,6 +231,8 @@ namespace LeitorDocx
             oPara1.Range.InsertParagraphAfter();
 
             #endregion
+
+            backgroundWorker1.ReportProgress(20);
 
             #region 1ª TABELA
 
@@ -230,6 +262,8 @@ namespace LeitorDocx
 
             #endregion
 
+            backgroundWorker1.ReportProgress(30);
+
             #region TÍTULO DADOS PESSOAIS
 
             Microsoft.Office.Interop.Word.Paragraph oPara2;
@@ -244,6 +278,8 @@ namespace LeitorDocx
             oPara2.Range.InsertParagraphAfter();
 
             #endregion
+
+            backgroundWorker1.ReportProgress(40);
 
             #region 2ª TABELA
 
@@ -305,6 +341,8 @@ namespace LeitorDocx
 
             #endregion
 
+            backgroundWorker1.ReportProgress(50);
+
             #region TÍTULO DADOS RESIDENCIAIS
 
             Microsoft.Office.Interop.Word.Paragraph oPara3;
@@ -319,6 +357,8 @@ namespace LeitorDocx
             oPara3.Range.InsertParagraphAfter();
 
             #endregion
+
+            backgroundWorker1.ReportProgress(60);
 
             #region 3ª TABELA
 
@@ -360,6 +400,8 @@ namespace LeitorDocx
 
             #endregion
 
+            backgroundWorker1.ReportProgress(70);
+
             #region TÍTULO DADOS DA PROPOSTA
 
             Microsoft.Office.Interop.Word.Paragraph oPara4;
@@ -374,6 +416,8 @@ namespace LeitorDocx
             oPara4.Range.InsertParagraphAfter();
 
             #endregion
+
+            backgroundWorker1.ReportProgress(80);
 
             #region 4ª TABELA
 
@@ -415,6 +459,8 @@ namespace LeitorDocx
 
             #endregion
 
+            backgroundWorker1.ReportProgress(90);
+
             #region MARCA D'AGUA
 
             //string marcaDagua = AppDomain.CurrentDomain.BaseDirectory + @"marca.png";
@@ -438,9 +484,55 @@ namespace LeitorDocx
 
             #endregion
 
-            #endregion
+            backgroundWorker1.ReportProgress(100);
 
-            //oDoc.PrintOut();
+            #endregion
+            PrintDialog pDialog = new PrintDialog();
+            if (pDialog.ShowDialog() == DialogResult.OK)
+            {
+                
+                //Word.Document doc = wordApp.Documents.Add(@"c:\temp.docx");
+                oWord.ActivePrinter = pDialog.PrinterSettings.PrinterName;
+                oWord.ActiveDocument.PrintOut(); //this will also work: doc.PrintOut();
+                MessageBox.Show("Impressão concluída!");
+                oDoc.Close(SaveChanges: false);
+                oDoc = null;
+                oWord.Quit(SaveChanges: false);
+            }
+            else
+            {
+                MessageBox.Show("Impressão cancelada!");
+                oDoc.Close(SaveChanges: false);
+                oDoc = null;
+                oWord.Quit(SaveChanges: false);
+            }
+
+            //while (oWord.BackgroundPrintingStatus > 0)
+            //{
+            //    // Thread.Sleep(500);
+            //}
+
+            // <EDIT to include Jason's suggestion>
+            //oWord.Quit(SaveChanges: false);
+            // </EDIT>
+            //int dialogResult = oWord.Dialogs[Microsoft.Office.Interop.Word.WdWordDialog.wdDialogFilePrint].Show(ref oMissing);
+            ////((Document)oDoc).PrintOut();
+            ////oDoc.Close(WdSaveOptions.wdDoNotSaveChanges);
+            ////oWord.Quit(WdSaveOptions.wdDoNotSaveChanges);
+            //if (dialogResult == 1)
+            //{
+            //    //oWord.Quit(WdSaveOptions.wdDoNotSaveChanges);
+            //    //oDoc.Close(false);
+            //    //oDoc.PrintOut(ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+            //    //             ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+            //    //             ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+            //    //             ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+            //    //             ref oMissing, ref oMissing);
+            //}
+            //else
+            //{
+            //    oDoc.Close(false);
+            //}
             //SaveFileDialog saveFileDialog = new SaveFileDialog();
             //saveFileDialog.Filter = "Documento do Word|*.docx";
             //saveFileDialog.FileName = "Documento_Preenchido.docx";
@@ -457,6 +549,16 @@ namespace LeitorDocx
             //    FinalizarDocumento();
             //    InitializeDocument();
             //}
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            progressBar1.Visible = false;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
